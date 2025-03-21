@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:6.0
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro
+      - mongo-data:/data/db
+    networks:
+      - internal
+
+  auth-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: auth-api
+    container_name: auth-service
+    ports:
+      - "8081:8080"
+    depends_on:
+      - mongo
+    networks:
+      - internal
+
+  backoffice-service:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile
+      args:
+        MODULE: backoffice-api
+    container_name: backoffice-service
+    ports:
+      - "8082:8080"
+    depends_on:
+      - mongo
+    networks:
+      - internal
+
+volumes:
+  mongo-data:
+
+
+networks:
+  internal:
+    driver: bridge
