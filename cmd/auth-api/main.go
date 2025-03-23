@@ -2,16 +2,22 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"net/http"
 )
 
 func main() {
-	fmt.Println("Auth service is starting on :8080...")
+	mux := http.NewServeMux()
+	mux.HandleFunc("/hello", HelloHandler)
+	StartServer(mux)
+}
 
-	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("Auth service OK"))
-	})
+func StartServer(mux *http.ServeMux) {
+	fmt.Println("Starting server on :8080")
+	if err := http.ListenAndServe(":8080", mux); err != nil {
+		fmt.Println("Server failed:", err)
+	}
+}
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+func HelloHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintln(w, "Hola Mundo")
 }
